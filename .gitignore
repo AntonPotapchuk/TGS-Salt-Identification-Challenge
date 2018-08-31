@@ -1,0 +1,13 @@
+.idea
+.ipynb_checkpoints
+dataset.zip
+checkpoints
+dataset
+experiments
+features_experiments
+logs
+papers
+submission
+tesorboard
+*.txt
+*.ipynb
