@@ -25,6 +25,9 @@ def get_model(name, input_shape, dropout=0):
     if name == 'unet_resnet50':
         from models.unet_resnet50 import get_model
         return get_model(input_shape, dropout)
+    if name == 'unet_inception_resnet_v2':
+        from models.unet_inception_resnet_v2 import get_model
+        return get_model(input_shape, dropout)
     raise Exception("Unknown model")
 
 

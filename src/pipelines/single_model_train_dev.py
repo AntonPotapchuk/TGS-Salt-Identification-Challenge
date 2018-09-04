@@ -48,7 +48,7 @@ def pipeline(args):
     experiment_name = args.name
     data_path = args.data_path
     log_path = args.log_path
-    if args.model_name.startswith('unet_resnet') and args.image_size != 224:
+    if (args.model_name.startswith('unet_resnet') or args.model_name.startswith('unet_inception')) and args.image_size != 224:
         print("Warning! For resnet models image size should be 224! It was specified automaticaly")
         args.image_size = 224
 
