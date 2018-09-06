@@ -1,7 +1,8 @@
 from keras import Model
 from keras.layers import UpSampling2D, SpatialDropout2D
 from keras.layers.merge import concatenate
-from keras.applications.inception_resnet_v2 import InceptionResNetV2, preprocess_input
+from keras.applications.inception_resnet_v2 import preprocess_input
+from models.inception_resnet_2 import InceptionResNetV2
 from models.common import *
 from models.model_base import ModelBase
 
@@ -11,10 +12,11 @@ class UnetInceptionResnet2(ModelBase):
         super(UnetInceptionResnet2, self).__init__(dropout)
 
     def get_image_size(self):
-        return 299
+        return 224
 
     def _create_model(self, input_shape, dropout=0):
         base_model = InceptionResNetV2(include_top=False, input_shape=input_shape)
+
         conv1 = base_model.get_layer('activation_3').output
         conv2 = base_model.get_layer('activation_5').output
         conv3 = base_model.get_layer('block35_10_ac').output
