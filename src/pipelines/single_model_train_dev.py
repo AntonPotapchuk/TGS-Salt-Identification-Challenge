@@ -4,7 +4,6 @@ import sys
 import numpy as np
 
 from argparse import ArgumentParser
-from keras.models import load_model
 from data.loading import get_dataset
 from data.datagen import create_datagen
 from data.submission import make_submission
@@ -128,18 +127,13 @@ def pipeline(args):
     res = model.evaluate(X_dev, Y_dev, verbose=1)
     print("Test loss:", res[0])
     print("Test mean IoU:", res[1])
+    sys.stdout.flush()
 
     ############################# Second data preprocessing #############################
     X_full = np.concatenate([X_train, X_dev])
     Y_full = np.concatenate([Y_train, Y_dev])
-    del X_train, Y_train, X_dev, Y_dev
+    del X_train, Y_train, X_dev, Y_dev, train_gen, val_gen
     gc.collect()
-
-    print("Creating test set")
-    test_ids = os.listdir(test_img_path)
-    X_test = get_dataset(test_ids, test_img_path, None, image_size=image_size, is_test=True,
-                         preprocess_func=image_process_func)
-
     train_gen, val_gen = create_datagen(X_full, Y_full, args,
                                         batch_size=batch_size,
                                         shuffle=shuffle,
@@ -156,8 +150,15 @@ def pipeline(args):
     train_params['steps_per_epoch'] = train_steps_per_epoch
     train_params['validation_steps'] = val_steps_per_epoch
     model.fit_generator(**train_params)
+
+    del X_full, Y_full, train_gen, val_gen
+    gc.collect()
     ############################# Prediction #############################
     # Predict on train, val and test
+    print("Creating test set")
+    test_ids = os.listdir(test_img_path)
+    X_test = get_dataset(test_ids, test_img_path, None, image_size=image_size, is_test=True,
+                         preprocess_func=image_process_func)
     print("Loading best model")
     model.load_weights(model_path)
     print("Making predictions")

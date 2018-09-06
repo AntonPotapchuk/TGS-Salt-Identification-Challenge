@@ -5,7 +5,6 @@ from common.constants import MAX_WIDTH_WITHOUT_PADDING
 from data.common import get_padding_width
 from keras.preprocessing.image import img_to_array, load_img
 from skimage.transform import resize
-from matplotlib import pyplot as plt
 
 def process_image(img, width, preprocess_func=None):
     if width <= MAX_WIDTH_WITHOUT_PADDING:
@@ -39,4 +38,4 @@ def get_dataset(ids, img_folder, mask_folder, image_size, is_test=False, preproc
     X = np.nan_to_num(np.array(X))
     if is_test:
         return X
-    return X, Y
+    return X.astype(np.float32), Y
