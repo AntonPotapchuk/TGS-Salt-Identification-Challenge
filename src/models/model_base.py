@@ -34,7 +34,7 @@ class ModelBase(ABC):
         raise Exception("Unknown loss: " + str(loss))
 
     def __get_metric(self, metric):
-        if metric == 'binary_crossentropy':
+        if metric == 'accuracy':
             return metric
         if metric == 'mean_prec_iou':
             self.custom_objects[mean_prec_iou.__name__] = mean_prec_iou

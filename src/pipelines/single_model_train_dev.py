@@ -75,7 +75,7 @@ def pipeline(args):
     sys.stdout.flush()
     print("Creating model...")
     model = get_model(args.model_name, dropout=args.dropout)
-    model.compile(optimizer='adam', loss=args.loss, metrics=['mean_prec_iou'])
+    model.compile(optimizer='adam', loss=args.loss, metrics=['mean_prec_iou', 'accuracy'])
     image_size = model.get_image_size()
     image_process_func = model.get_image_preprocessor()
 
