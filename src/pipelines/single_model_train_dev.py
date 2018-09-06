@@ -77,19 +77,20 @@ def pipeline(args):
     model.compile(optimizer='adam', loss=args.loss, metrics=['mean_prec_iou', 'accuracy'])
     image_size = model.get_image_size()
     image_process_func = model.get_image_preprocessor()
-
     ############################# First data preprocessing #############################
     train_ids, dev_ids = single_model_train_test_split(train_img_path, train_mask_path, args.test_size)
     print('Getting and resizing train images and masks ... ')
+    sys.stdout.flush()
     X_train, Y_train = get_dataset(train_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
                                    preprocess_func=image_process_func)
+    sys.stdout.flush()
     print('Getting and resizing devel images and masks ... ')
     X_dev, Y_dev = get_dataset(dev_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
                                preprocess_func=image_process_func)
     print('Done!')
     print("Train shape:", X_train.shape)
     print("Dev shape:", X_dev.shape)
-
+    sys.stdout.flush()
     if args.validation_split == 0:
         train_gen = create_datagen(X_train, Y_train, args,
                                    batch_size=batch_size,
@@ -160,7 +161,7 @@ def pipeline(args):
     print("Loading best model")
     model.load_weights(model_path)
     print("Making predictions")
-    preds_test = model.predict(X_test, verbose=1)
+    preds_test = model.predict(X_test, verbose=0)
     print("Making submission")
     make_submission(test_ids, preds_test, submission_path, original_size=ORIGINAL_SIZE)
 

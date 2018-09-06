@@ -5,6 +5,7 @@ from common.constants import MAX_WIDTH_WITHOUT_PADDING
 from data.common import get_padding_width
 from keras.preprocessing.image import img_to_array, load_img
 from skimage.transform import resize
+from tqdm import tqdm
 
 def process_image(img, width, preprocess_func=None):
     if width <= MAX_WIDTH_WITHOUT_PADDING:
@@ -22,20 +23,20 @@ def process_image(img, width, preprocess_func=None):
 
 
 def get_dataset(ids, img_folder, mask_folder, image_size, is_test=False, preprocess_func=None):
-    X = []
+    X = np.zeros((len(ids), image_size, image_size, 3), dtype=np.float32)
     if not is_test:
         Y = np.zeros((len(ids), image_size, image_size, 1), dtype=np.bool)
-    for n, id_ in enumerate(ids):
+    for n, id_ in tqdm(enumerate(ids), total=len(ids)):
         img = load_img(os.path.join(img_folder, id_))
         img = img_to_array(img)
         img = process_image(img, image_size, preprocess_func)
-        X.append(img)
+        X[n] = img
         if not is_test:
             mask = load_img(os.path.join(mask_folder, id_))
             mask = img_to_array(mask)[:,:,1]
             Y[n] = np.expand_dims(process_image(mask, image_size, None), axis=2)
 
-    X = np.nan_to_num(np.array(X))
+    X = np.array(X)
     if is_test:
         return X
-    return X.astype(np.float32), Y
+    return X, Y
