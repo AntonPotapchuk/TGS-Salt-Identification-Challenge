@@ -14,3 +14,4 @@ tesorboard
 *.zip
 src.zip
 src_depth.zip
+run.sbatch
