@@ -81,7 +81,6 @@ def pipeline(args):
     ############################# First data preprocessing #############################
     train_ids, dev_ids = single_model_train_test_split(train_img_path, train_mask_path, args.test_size)
     print('Getting and resizing train images and masks ... ')
-    sys.stdout.flush()
     X_train, Y_train = get_dataset(train_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
                                    preprocess_func=image_process_func)
     print('Getting and resizing devel images and masks ... ')
@@ -127,7 +126,6 @@ def pipeline(args):
     res = model.evaluate(X_dev, Y_dev, verbose=1)
     print("Test loss:", res[0])
     print("Test mean IoU:", res[1])
-    sys.stdout.flush()
 
     ############################# Second data preprocessing #############################
     X_full = np.concatenate([X_train, X_dev])
@@ -140,7 +138,7 @@ def pipeline(args):
                                         random_seed=random_seed)
     ############################# Second training #############################
     print("Loading best model")
-    model.load_weights(model)
+    model.load_weights(model_path)
     # fits the model on batches with real-time data augmentation:
     print("Fitting model on full dataset")
     train_steps_per_epoch = int(len(X_full) * (1 - args.validation_split) / batch_size)
