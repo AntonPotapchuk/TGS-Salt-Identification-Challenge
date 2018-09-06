@@ -12,3 +12,5 @@ tesorboard
 *.txt
 *.ipynb
 *.zip
+src.zip
+src_depth.zip
