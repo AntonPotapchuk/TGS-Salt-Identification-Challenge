@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 def mean_prec_iou(y_true, y_pred):
     with tf.variable_scope(None, 'mean_prec_iou', (y_pred, y_true)):
         y_pred.get_shape().assert_is_compatible_with(y_true.get_shape())
