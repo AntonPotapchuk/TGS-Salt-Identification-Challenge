@@ -10,7 +10,7 @@ def transform_predictions(prediction, original_size):
     size = prediction.shape[0]
     pad_width = get_padding_width(size, MAX_WIDTH_WITHOUT_PADDING)
     prediction = prediction[pad_width:-pad_width, pad_width:-pad_width]
-    prediction = resize(prediction, original_size, mode='constant', preserve_range=True)
+    prediction = resize(prediction, (original_size, original_size), mode='constant', preserve_range=True)
     return prediction
 
 
