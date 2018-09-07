@@ -71,7 +71,10 @@ class ModelBase(ABC):
         if tensorboard_dir is not None:
             callbacks.append(TensorBoard(tensorboard_dir))
         if model_path is not None:
-            callbacks.append(ModelCheckpoint(model_path, save_best_only=not save_not_best_only))
+            monitor = 'val_loss'
+            if save_not_best_only:
+                monitor = 'loss'
+            callbacks.append(ModelCheckpoint(model_path, save_best_only=True, monitor=monitor))
         if lr_patience is not None and lr_patience > 0:
             callbacks.append(ReduceLROnPlateau(monitor='loss', factor=lr_alpha, patience=lr_patience))
         return callbacks
