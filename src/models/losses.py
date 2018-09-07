@@ -12,7 +12,7 @@ def __dice_coef(y_true, y_pred, smooth=1e-6):
     return (K.constant(2.) * intersection + smooth) / (K.sum(y_true, -1) + K.sum(y_pred, -1) + smooth)
 
 
-def soft_dice_loss(y_true, y_pred):
+def dice_loss(y_true, y_pred):
     return K.constant(1) - __dice_coef(y_true, y_pred)
 
 

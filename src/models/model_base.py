@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from models.metrics import mean_prec_iou
-from models.losses import jaccard_distance_loss, soft_dice_loss
+from models.losses import jaccard_distance_loss, dice_loss
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 
 
@@ -25,9 +25,9 @@ class ModelBase(ABC):
     def __get_loss(self, loss):
         if loss == 'binary_crossentropy':
             return loss
-        if loss == 'soft_dice':
-            self.custom_objects[soft_dice_loss.__name__] = soft_dice_loss
-            return soft_dice_loss
+        if loss == 'dice_loss':
+            self.custom_objects[dice_loss.__name__] = dice_loss
+            return dice_loss
         if loss == 'jaccard_distance_loss':
             self.custom_objects[jaccard_distance_loss.__name__] = jaccard_distance_loss
             return jaccard_distance_loss
