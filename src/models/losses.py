@@ -110,3 +110,9 @@ def __flatten_binary_scores(scores, labels):
     scores = tf.reshape(scores, (-1,))
     labels = tf.reshape(labels, (-1,))
     return scores, labels
+
+# My loss
+def mean_iou_loss(y_true, y_pred):
+    from models.metrics import mean_prec_iou
+    
+    return K.constant(1., dtype=tf.float32) - mean_prec_iou(y_true, y_pred)

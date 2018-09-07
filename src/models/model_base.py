@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from models.metrics import mean_prec_iou
-from models.losses import jaccard_distance_loss, dice_loss, lovasz_hinge
+from models.losses import jaccard_distance_loss, dice_loss, lovasz_hinge, mean_iou_loss
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 
 
@@ -35,6 +35,9 @@ class ModelBase(ABC):
         if loss == 'lovasz_hinge':
             self.custom_objects[lovasz_hinge.__name__] = lovasz_hinge
             return lovasz_hinge
+        if loss == 'mean_iou_loss':
+            self.custom_objects[mean_iou_loss.__name__] = mean_iou_loss
+            return mean_iou_loss
         raise Exception("Unknown loss: " + str(loss))
 
     def __get_metric(self, metric):
