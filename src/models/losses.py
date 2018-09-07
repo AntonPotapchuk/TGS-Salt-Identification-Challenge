@@ -55,23 +55,21 @@ def __lovasz_grad(gt_sorted):
 
 
 # --------------------------- BINARY LOSSES ---------------------------
-def lovasz_hinge(labels, logits, per_image=True):
+def lovasz_hinge(labels, logits):
     """
     Binary Lovasz hinge loss
       logits: [B, H, W] Variable, logits at each pixel (between -\infty and +\infty)
       labels: [B, H, W] Tensor, binary ground truth masks (0 or 1)
       per_image: compute the loss per image instead of per batch
     """
-    if per_image:
-        def treat_image(log_lab):
-            log, lab = log_lab
-            log, lab = tf.expand_dims(log, 0), tf.expand_dims(lab, 0)
-            log, lab = __flatten_binary_scores(log, lab)
-            return __lovasz_hinge_flat(log, lab)
-        losses = tf.map_fn(treat_image, (logits, labels), dtype=tf.float32)
-        loss = tf.reduce_mean(losses)
-    else:
-        loss = __lovasz_hinge_flat(*__flatten_binary_scores(logits, labels))
+    def treat_image(log_lab):
+        log, lab = log_lab
+        # log, lab = tf.expand_dims(log, 0), tf.expand_dims(lab, 0)
+        log, lab = __flatten_binary_scores(log, lab)
+        return __lovasz_hinge_flat(log, lab)
+    losses = tf.map_fn(treat_image, (logits, labels), dtype=tf.float32)
+    loss = tf.reduce_mean(losses)
+    loss.set_shape((None,))
     return loss
 
 
@@ -94,12 +92,13 @@ def __lovasz_hinge_flat(logits, labels):
         return loss
 
     # deal with the void prediction case (only void pixels)
-    loss = tf.cond(tf.equal(tf.shape(logits)[0], 0),
-                   lambda: tf.reduce_sum(logits) * 0.,
-                   compute_loss,
-                   strict=True,
-                   name="loss"
-                   )
+    #loss = tf.cond(tf.equal(tf.shape(logits)[0], 0),
+    #               lambda: tf.reduce_sum(logits) * 0.,
+    #               compute_loss,
+    #               strict=True,
+    #               name="loss"
+    #               )
+    loss = compute_loss()
     return loss
 
 
