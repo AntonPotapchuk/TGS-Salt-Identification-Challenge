@@ -115,10 +115,6 @@ def __flatten_binary_scores(scores, labels):
 # My loss
 def __mean_prec_iou(y_true, y_pred):
     with tf.variable_scope(None, 'mean_prec_iou', (y_pred, y_true)):
-        y_pred.get_shape().assert_is_compatible_with(y_true.get_shape())
-        y_pred = tf.cast(tf.round(y_pred), tf.int32)
-        y_true = tf.cast(y_true, tf.int32)
-
         def intersection_over_union(masks):
             eps = K.constant(1e-6)
             y_true, y_pred = masks
@@ -128,7 +124,9 @@ def __mean_prec_iou(y_true, y_pred):
             # intersection = tf.Print(intersection, [intersection], message='Intersection:')
             union = tf.reduce_sum(tf.add(y_true, y_pred)) - intersection
             # union = tf.Print(union, [union], message='Union:')
-            iou = tf.cast((intersection + eps) / (union + eps), dtype=tf.float32)
+#            intersection = tf.cast(intersection, tf.float32)
+#            union = tf.cast(union, tf.float32)
+            iou = (intersection + eps) / (union + eps)
             return iou
 
         batch_score = tf.map_fn(intersection_over_union, (y_true, y_pred), dtype=tf.float32)
