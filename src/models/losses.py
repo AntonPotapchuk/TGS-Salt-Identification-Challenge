@@ -1,5 +1,6 @@
 import keras.backend as K
 import tensorflow as tf
+import numpy as np
 
 
 def __dice_coef(y_true, y_pred, smooth=1e-6):
