@@ -5,8 +5,8 @@ from common.constants import ORIGINAL_IMAGE_SIZE
 
 
 class UnetBaseline(ModelBase):
-    def __init__(self, dropout=0):
-        super(UnetBaseline, self).__init__(dropout)
+    def __init__(self, dropout=0, last_activation='sigmoid'):
+        super(UnetBaseline, self).__init__(dropout, last_activation)
 
     def get_image_size(self):
         return ORIGINAL_IMAGE_SIZE
@@ -21,7 +21,7 @@ class UnetBaseline(ModelBase):
         c = BatchNormalization()(c)
         return c
 
-    def _create_model(self, input_shape, dropout=0):
+    def _create_model(self, input_shape, dropout=0, last_activation='sigmoid'):
         # Build U-Net model
         inputs = Input(input_shape)
         # Not dropout for the first layer
@@ -56,7 +56,7 @@ class UnetBaseline(ModelBase):
         u9 = concatenate([u9, c1], axis=3)
         c9 = self.__conv_block(u9, 8, 0)
 
-        outputs = Conv2D(1, (1, 1), activation='sigmoid')(c9)
+        outputs = Conv2D(1, (1, 1), activation=last_activation)(c9)
 
         model = Model(inputs=[inputs], outputs=[outputs])
         return model

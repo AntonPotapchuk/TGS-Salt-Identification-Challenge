@@ -32,6 +32,8 @@ def create_parser():
     parser.add_argument('--reduce-lr-patience', default=3, type=int)
     parser.add_argument('--reduce-lr-alpha', default=0.2, type=float)
     parser.add_argument('--save-not-best-only', default=False, action='store_true')
+    parser.add_argument('--weights-path', default=None, type=str)
+    parser.add_argument('--last-activation', default='sigmoid')
     parser = add_datagen_args(parser)
     return parser
 
@@ -74,8 +76,11 @@ def pipeline(args):
     ############################# Creating model #############################
     sys.stdout.flush()
     print("Creating model...")
-    model = get_model(args.model_name, dropout=args.dropout)
+    model = get_model(args.model_name, dropout=args.dropout, last_activation=args.last_activation)
     model.compile(optimizer='adam', loss=args.loss, metrics=['mean_prec_iou', 'accuracy'])
+    if args.weights_path is not None:
+        print("Loading weights")
+        model.load_weights(args.weights_path)
     image_size = model.get_image_size()
     image_process_func = model.get_image_preprocessor()
     ############################# First data preprocessing #############################

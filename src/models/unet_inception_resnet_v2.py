@@ -8,13 +8,13 @@ from models.model_base import ModelBase
 
 
 class UnetInceptionResnet2(ModelBase):
-    def __init__(self, dropout=0.0):
-        super(UnetInceptionResnet2, self).__init__(dropout)
+    def __init__(self, dropout=0.0, last_activation='sigmoid'):
+        super(UnetInceptionResnet2, self).__init__(dropout, last_activation)
 
     def get_image_size(self):
         return 224
 
-    def _create_model(self, input_shape, dropout=0):
+    def _create_model(self, input_shape, dropout=0, last_activation='sigmoid'):
         base_model = InceptionResNetV2(include_top=False, input_shape=input_shape)
 
         conv1 = base_model.get_layer('activation_3').output
@@ -42,7 +42,7 @@ class UnetInceptionResnet2(ModelBase):
         conv10 = conv_block_simple(up10, 48, "conv10_1")
         conv10 = conv_block_simple(conv10, 32, "conv10_2")
         conv10 = SpatialDropout2D(0.4)(conv10)
-        x = Conv2D(1, (1, 1), activation="sigmoid", name="prediction")(conv10)
+        x = Conv2D(1, (1, 1), activation=last_activation, name="prediction")(conv10)
         model = Model(base_model.input, x)
         return model
 

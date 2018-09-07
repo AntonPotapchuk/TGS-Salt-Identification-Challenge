@@ -11,13 +11,13 @@ from models.resnet50_fixed import ResNet50
 
 
 class UnetResnet50(ModelBase):
-    def __init__(self, dropout=0.0):
-        super(UnetResnet50, self).__init__(dropout)
+    def __init__(self, dropout=0.0, last_activation='sigmoid'):
+        super(UnetResnet50, self).__init__(dropout, last_activation)
 
     def get_image_size(self):
         return 224
 
-    def _create_model(self, input_shape, dropout=0):
+    def _create_model(self, input_shape, dropout=0, last_activation='sigmoid'):
         resnet_base = ResNet50(input_shape=input_shape, include_top=False)
 
         for l in resnet_base.layers:
@@ -52,7 +52,7 @@ class UnetResnet50(ModelBase):
         conv10 = conv_block_simple(up10, 32, "conv10_1")
         conv10 = conv_block_simple(conv10, 32, "conv10_2")
         conv10 = SpatialDropout2D(0.2)(conv10)
-        x = Conv2D(1, (1, 1), activation="sigmoid", name="prediction")(conv10)
+        x = Conv2D(1, (1, 1), activation=last_activation, name="prediction")(conv10)
         model = Model(resnet_base.input, x)
         return model
 

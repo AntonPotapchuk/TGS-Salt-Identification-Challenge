@@ -1,21 +1,22 @@
 from abc import ABC, abstractmethod
 from models.metrics import mean_prec_iou
-from models.losses import jaccard_distance_loss, dice_loss
+from models.losses import jaccard_distance_loss, dice_loss, lovasz_hinge
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 
 
 class ModelBase(ABC):
-    def __init__(self, dropout):
+    def __init__(self, dropout, last_activatvion='sigmoid'):
         self.custom_objects = {}
         width = self.get_image_size()
-        self.model = self._create_model(input_shape=[width, width, 3], dropout=dropout)
+        self.model = self._create_model(input_shape=[width, width, 3], dropout=dropout,
+                                        last_activatvion=last_activatvion)
 
     @abstractmethod
     def get_image_size(self):
         raise NotImplementedError("")
 
     @abstractmethod
-    def _create_model(self, input_shape, dropout=0.0):
+    def _create_model(self, input_shape, dropout=0.0, last_activation='sigmoid'):
         raise NotImplementedError("")
 
     @abstractmethod
@@ -31,6 +32,9 @@ class ModelBase(ABC):
         if loss == 'jaccard_distance_loss':
             self.custom_objects[jaccard_distance_loss.__name__] = jaccard_distance_loss
             return jaccard_distance_loss
+        if loss == 'lovasz_hinge':
+            self.custom_objects[lovasz_hinge.__name__] = lovasz_hinge
+            return lovasz_hinge
         raise Exception("Unknown loss: " + str(loss))
 
     def __get_metric(self, metric):
