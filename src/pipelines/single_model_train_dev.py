@@ -31,6 +31,7 @@ def create_parser():
     parser.add_argument('--early-stopping', help='early-stopping-patience', default=9, type=int)
     parser.add_argument('--reduce-lr-patience', default=3, type=int)
     parser.add_argument('--reduce-lr-alpha', default=0.2, type=float)
+    parser.add_argument('--save-not-best-only', default=False, action='store_true')
     parser = add_datagen_args(parser)
     return parser
 
@@ -117,6 +118,7 @@ def pipeline(args):
                     'lr_patience': args.reduce_lr_patience,
                     'lr_alpha': args.reduce_lr_alpha,
                     'early_stopping': args.early_stopping,
+                    'save_not_best_only': args.save_not_best_only,
                     'model_path': model_path,
                     'tensorboard_dir': tensorboard_dir}
     model.fit_generator(**train_params)

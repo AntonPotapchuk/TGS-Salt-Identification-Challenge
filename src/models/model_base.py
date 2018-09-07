@@ -53,22 +53,25 @@ class ModelBase(ABC):
 
     def fit_generator(self, train_gen, epochs=1, shuffle=True, val_gen=None, steps_per_epoch=None,
                       validation_steps=None, lr_patience=None, lr_alpha=0.2, early_stopping=None,
-                      model_path="model.h4", tensorboard_dir=None):
+                      model_path="model.h4", tensorboard_dir=None,
+                      save_not_best_only=False):
 
-        callbacks = self.__get_callbacks(model_path, lr_patience, lr_alpha, early_stopping, tensorboard_dir)
+        callbacks = self.__get_callbacks(model_path, lr_patience, lr_alpha, early_stopping, tensorboard_dir,
+                                         save_not_best_only)
         return self.model.fit_generator(train_gen, epochs=epochs, shuffle=shuffle,
                                         validation_data=val_gen, callbacks=callbacks, verbose=2,
                                         steps_per_epoch=steps_per_epoch, validation_steps=validation_steps)
 
     @staticmethod
-    def __get_callbacks(model_path, lr_patience=3, lr_alpha=0.2, early_stopping=10, tensorboard_dir=None):
+    def __get_callbacks(model_path, lr_patience=3, lr_alpha=0.2, early_stopping=10, tensorboard_dir=None,
+                        save_not_best_only=False):
         callbacks = []
         if early_stopping is not None and early_stopping > 0:
             callbacks.append(EarlyStopping(patience=early_stopping, verbose=1))
         if tensorboard_dir is not None:
             callbacks.append(TensorBoard(tensorboard_dir))
         if model_path is not None:
-            callbacks.append(ModelCheckpoint(model_path, save_best_only=True))
+            callbacks.append(ModelCheckpoint(model_path, save_best_only=not save_not_best_only))
         if lr_patience is not None and lr_patience > 0:
             callbacks.append(ReduceLROnPlateau(monitor='loss', factor=lr_alpha, patience=lr_patience))
         return callbacks
