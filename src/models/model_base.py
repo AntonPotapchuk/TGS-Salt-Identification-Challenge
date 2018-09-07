@@ -89,4 +89,4 @@ class ModelBase(ABC):
         print(self.model.summary())
 
     def predict(self, x, batch_size=None, verbose=0, steps=None):
-        self.model.predict(x, batch_size, verbose=verbose, steps=steps)
+        return self.model.predict(x, batch_size, verbose=verbose, steps=steps)
