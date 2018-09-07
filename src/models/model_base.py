@@ -5,11 +5,11 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, T
 
 
 class ModelBase(ABC):
-    def __init__(self, dropout, last_activatvion='sigmoid'):
+    def __init__(self, dropout, last_activation='sigmoid'):
         self.custom_objects = {}
         width = self.get_image_size()
         self.model = self._create_model(input_shape=[width, width, 3], dropout=dropout,
-                                        last_activatvion=last_activatvion)
+                                        last_activation=last_activation)
 
     @abstractmethod
     def get_image_size(self):
