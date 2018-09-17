@@ -128,10 +128,10 @@ def pipeline(args):
                     'tensorboard_dir': tensorboard_dir}
     model.fit_generator(**train_params)
     print("Evaluating")
-    res = model.evaluate(X_train, Y_train, verbose=0)
+    res = model.evaluate(X_train, Y_train, verbose=1)
     print("Train loss:", res[0])
     print("Train mean IoU:", res[1])
-    res = model.evaluate(X_dev, Y_dev, verbose=0)
+    res = model.evaluate(X_dev, Y_dev, verbose=1)
     print("Test loss:", res[0])
     print("Test mean IoU:", res[1])
 
@@ -168,7 +168,7 @@ def pipeline(args):
     print("Loading best model")
     model.load_weights(model_path)
     print("Making predictions")
-    preds_test = model.predict(X_test, verbose=0)
+    preds_test = model.predict(X_test, verbose=1)
     print("Making submission")
     make_submission(test_ids, preds_test, submission_path)
 

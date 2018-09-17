@@ -66,7 +66,7 @@ class ModelBase(ABC):
         callbacks = self.__get_callbacks(model_path, lr_patience, lr_alpha, early_stopping, tensorboard_dir,
                                          save_not_best_only)
         return self.model.fit_generator(train_gen, epochs=epochs, shuffle=shuffle,
-                                        validation_data=val_gen, callbacks=callbacks, verbose=2,
+                                        validation_data=val_gen, callbacks=callbacks, verbose=1,
                                         steps_per_epoch=steps_per_epoch, validation_steps=validation_steps)
 
     @staticmethod

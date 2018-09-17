@@ -9,7 +9,7 @@ class UnetBaseline(ModelBase):
         super(UnetBaseline, self).__init__(dropout, last_activation)
 
     def get_image_size(self):
-        return ORIGINAL_IMAGE_SIZE
+        return 128
 
     @staticmethod
     def __conv_block(inp, filters, dropout=0):
