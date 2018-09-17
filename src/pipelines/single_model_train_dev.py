@@ -34,6 +34,7 @@ def create_parser():
     parser.add_argument('--save-not-best-only', default=False, action='store_true')
     parser.add_argument('--weights-path', default=None, type=str)
     parser.add_argument('--last-activation', default='sigmoid')
+    parser.add_argument('--optimizer', default='adam')
     parser = add_datagen_args(parser)
     return parser
 
@@ -77,7 +78,7 @@ def pipeline(args):
     sys.stdout.flush()
     print("Creating model...")
     model = get_model(args.model_name, dropout=args.dropout, last_activation=args.last_activation)
-    model.compile(optimizer='adam', loss=args.loss, metrics=['mean_prec_iou', 'accuracy'])
+    model.compile(optimizer=args.optimizer, loss=args.loss, metrics=['mean_prec_iou', 'accuracy'])
     if args.weights_path is not None:
         print("Loading weights")
         model.load_weights(args.weights_path)
