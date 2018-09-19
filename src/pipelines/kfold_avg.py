@@ -8,7 +8,7 @@ from data.loading import get_dataset
 from data.datagen import create_datagen
 from data.submission import make_submission
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-from models import get_model, get_model_class
+from models import get_model, get_model_class, reset_tensorflow
 from models.losses import lovasz_loss
 from models.metrics import my_iou_metric, my_iou_metric_2
 from tqdm import tqdm
@@ -57,6 +57,7 @@ def training_stage(train_gen, val_gen, train_steps, val_steps, model_path, tenso
                 metrics, loss, X_train, Y_train, X_val, Y_val, weights_path=None):
     print("Creating model")
     sys.stdout.flush()
+    reset_tensorflow()
     model = get_model(args.model_name, dropout=args.dropout, last_activation=last_activation)
     model.compile(optimizer=args.optimizer, loss=loss, metrics=metrics)
     if weights_path is not None:
