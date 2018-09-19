@@ -18,7 +18,8 @@ from sklearn.model_selection import KFold
 def get_callbacks(model_path, args, tensorboard_dir=None):
     callbacks = []
     if args.early_stopping is not None and args.early_stopping > 0:
-        callbacks.append(EarlyStopping(patience=args.early_stopping, verbose=1))
+        monitor = "loss" if args.save_not_best_only else "val_loss"
+        callbacks.append(EarlyStopping(patience=args.early_stopping, verbose=1, monitor=monitor))
     if tensorboard_dir is not None:
         callbacks.append(TensorBoard(tensorboard_dir, write_graph=False))
     if model_path is not None:
