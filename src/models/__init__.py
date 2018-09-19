@@ -8,13 +8,16 @@ set_session(sess)  # set this TensorFlow session as the default session for Kera
 
 
 def get_model(name, dropout=0.0, last_activation='sigmoid'):
+    return get_model_class(name)(dropout, last_activation)
+
+
+def get_model_class(name):
     if name == 'baseline':
         from models.unet_baseline_model import UnetBaseline
-        return UnetBaseline(dropout, last_activation)
+        return UnetBaseline
     if name == 'unet_resnet50':
         from models.unet_resnet50 import UnetResnet50
-        return UnetResnet50(dropout, last_activation)
+        return UnetResnet50
     if name == 'unet_inception_resnet_v2':
         from models.unet_inception_resnet_v2 import UnetInceptionResnet2
-        return UnetInceptionResnet2(dropout, last_activation)
-    raise Exception("Unknown model")
+        return UnetInceptionResnet2

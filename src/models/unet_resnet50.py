@@ -14,7 +14,8 @@ class UnetResnet50(ModelBase):
     def __init__(self, dropout=0.0, last_activation='sigmoid'):
         super(UnetResnet50, self).__init__(dropout, last_activation)
 
-    def get_image_size(self):
+    @staticmethod
+    def get_image_size():
         return 224
 
     def _create_model(self, input_shape, dropout=0, last_activation='sigmoid'):
@@ -56,5 +57,6 @@ class UnetResnet50(ModelBase):
         model = Model(resnet_base.input, x)
         return model
 
-    def get_image_preprocessor(self):
+    @staticmethod
+    def get_image_preprocessor():
         return preprocess_input

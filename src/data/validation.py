@@ -1,6 +1,7 @@
 import os
 import numpy as np
 
+
 # TODO: Let's remove train_mask_path. Less save, but we know that ids are same
 def single_model_train_test_split(train_img_path, train_mask_path, test_size=0.3):
     # TODO: separate function?

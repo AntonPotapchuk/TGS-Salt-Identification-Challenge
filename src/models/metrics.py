@@ -33,3 +33,27 @@ def mean_prec_iou(y_true, y_pred):
         batch_score = tf.reduce_mean(batch_score)
         # batch_score = tf.Print(batch_score, [batch_score])
         return batch_score
+
+
+def get_iou_vector(labels, preds):
+    batch_size = labels.shape[0]
+    metric = []
+    for batch in range(batch_size):
+        true, predicted = labels[batch] > 0, preds[batch] > 0
+        intersection = np.logical_and(true, predicted)
+        union = np.logical_or(true, predicted)
+        iou = (np.sum(intersection > 0) + 1e-10) / (np.sum(union > 0) + 1e-10)
+        thresholds = np.arange(0.5, 1, 0.05)
+        s = []
+        for thresh in thresholds:
+            s.append(iou > thresh)
+        metric.append(np.mean(s))
+    return np.mean(metric)
+
+
+def my_iou_metric(labels, preds):
+    return tf.py_func(get_iou_vector, [labels, preds > 0.5], tf.float64)
+
+
+def my_iou_metric_2(labels, preds):
+    return tf.py_func(get_iou_vector, [labels, preds > 0], tf.float64)

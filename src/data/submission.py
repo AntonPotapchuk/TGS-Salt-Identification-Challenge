@@ -8,8 +8,9 @@ from data.common import get_padding_width
 def transform_predictions(prediction, original_size):
     prediction = np.squeeze(prediction)
     size = prediction.shape[0]
-    pad_width = get_padding_width(size, MAX_WIDTH_WITHOUT_PADDING)
-    prediction = prediction[pad_width:-pad_width, pad_width:-pad_width]
+    if size > MAX_WIDTH_WITHOUT_PADDING:
+        pad_width = get_padding_width(size, MAX_WIDTH_WITHOUT_PADDING)
+        prediction = prediction[pad_width:-pad_width, pad_width:-pad_width]
     prediction = resize(prediction, (original_size, original_size), mode='constant', preserve_range=True)
     return prediction
 
@@ -22,13 +23,17 @@ def rle_encode(im):
     return ' '.join(str(x) for x in runs)
 
 
-def make_submission(test_ids, preds_test, submission_path):
+def make_submission(test_ids, preds_test, submission_path, mode="round", threshold=None):
     # Create list of upsampled test masks
     predictions = []
     for i in range(len(preds_test)):
         predictions.append(transform_predictions(preds_test[i], ORIGINAL_IMAGE_SIZE))
-
-    pred_dict = { fn[:-4]: rle_encode(np.round(predictions[i])) for i, fn in enumerate(test_ids)}
+    if mode == "round":
+        pred_dict = { fn[:-4]: rle_encode(np.round(predictions[i])) for i, fn in enumerate(test_ids)}
+    elif mode == "threshold":
+        pred_dict = {fn[:-4]: rle_encode(predictions[i] > threshold) for i, fn in enumerate(test_ids)}
+    else:
+        raise ValueError("Unsupported mode: %s" % mode)
 
     sub = pd.DataFrame.from_dict(pred_dict, orient='index')
     sub.index.names = ['id']

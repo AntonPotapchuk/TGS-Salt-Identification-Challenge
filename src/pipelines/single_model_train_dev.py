@@ -10,9 +10,6 @@ from data.submission import make_submission
 from models import get_model
 from data.validation import single_model_train_test_split
 
-# TODO: hardcoded!!
-ORIGINAL_SIZE = 101
-
 
 def create_parser():
     from data.datagen import add_argparser_arguments as add_datagen_args

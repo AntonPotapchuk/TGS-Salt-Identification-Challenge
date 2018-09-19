@@ -8,7 +8,8 @@ class UnetBaseline(ModelBase):
     def __init__(self, dropout=0, last_activation='sigmoid'):
         super(UnetBaseline, self).__init__(dropout, last_activation)
 
-    def get_image_size(self):
+    @staticmethod
+    def get_image_size():
         return 128
 
     @staticmethod
@@ -61,5 +62,6 @@ class UnetBaseline(ModelBase):
         model = Model(inputs=[inputs], outputs=[outputs])
         return model
 
-    def get_image_preprocessor(self):
+    @staticmethod
+    def get_image_preprocessor():
         return None
