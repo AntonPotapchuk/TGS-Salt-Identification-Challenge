@@ -13,7 +13,8 @@ class ModelBase(ABC):
     def get_image_size():
         raise NotImplementedError("")
 
-    def get_number_of_channels(self):
+    @staticmethod
+    def get_number_of_channels():
         return 3
 
     @abstractmethod

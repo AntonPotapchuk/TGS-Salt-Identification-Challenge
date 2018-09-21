@@ -57,5 +57,7 @@ class UnetResnet34(ModelBase):
     def get_image_preprocessor():
         return preprocess_image
 
-    def get_number_of_channels(self):
+    @staticmethod
+    def get_number_of_channels():
         return 1
+
