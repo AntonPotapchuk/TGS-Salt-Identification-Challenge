@@ -18,12 +18,12 @@ from sklearn.model_selection import KFold
 def get_callbacks(model_path, args, tensorboard_dir=None):
     callbacks = []
     if args.early_stopping is not None and args.early_stopping > 0:
-        monitor = "loss" if args.save_not_best_only else "val_loss"
-        callbacks.append(EarlyStopping(patience=args.early_stopping, verbose=1, monitor=monitor))
+        callbacks.append(EarlyStopping(patience=args.early_stopping, verbose=1, monitor="loss"))
     if tensorboard_dir is not None:
         callbacks.append(TensorBoard(tensorboard_dir, write_graph=False))
     if model_path is not None:
         monitor = "loss" if args.save_not_best_only else "val_loss"
+        print("Optimize:", monitor)
         callbacks.append(ModelCheckpoint(model_path, save_best_only=True, monitor=monitor))
     if args.reduce_lr_patience is not None and args.reduce_lr_patience > 0:
         callbacks.append(ReduceLROnPlateau(monitor='loss',
