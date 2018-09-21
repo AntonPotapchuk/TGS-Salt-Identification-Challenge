@@ -24,13 +24,15 @@ def process_image(img, width, preprocess_func=None):
     return img
 
 
-def get_dataset(ids, img_folder, mask_folder, image_size, is_test=False, preprocess_func=None):
+def get_dataset(ids, img_folder, mask_folder, image_size, is_test=False, preprocess_func=None, single_channel=False):
     X = np.zeros((len(ids), image_size, image_size, 3), dtype=np.float32)
     if not is_test:
         Y = np.zeros((len(ids), image_size, image_size, 1), dtype=np.bool)
     for n, id_ in tqdm(enumerate(ids), total=len(ids)):
         img = load_img(os.path.join(img_folder, id_))
         img = img_to_array(img)
+        if single_channel:
+            img = np.expand_dims(img[:, :, 0], axis=-1)
         img = process_image(img, image_size, preprocess_func)
         X[n] = img
         if not is_test:

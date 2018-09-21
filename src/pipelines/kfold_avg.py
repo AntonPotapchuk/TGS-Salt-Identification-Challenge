@@ -183,18 +183,19 @@ def pipeline(args):
     model_class = get_model_class(args.model_name)
     image_process_func = model_class.get_image_preprocessor()
     image_size = model_class.get_image_size()
+    n_channels = model_class.get_number_of_channels()
 
     ############################# CREATE TRAIING SET #############################
     images_ids = os.listdir(train_img_path)
     print("Preparing training set")
     sys.stdout.flush()
     images, masks = get_dataset(images_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
-                                preprocess_func=image_process_func)
+                                preprocess_func=image_process_func, single_channel=n_channels==1)
     print("Preparing test set")
     sys.stdout.flush()
     test_ids = os.listdir(test_img_path)
     X_test = get_dataset(test_ids, test_img_path, None, image_size=image_size, is_test=True,
-                         preprocess_func=image_process_func)
+                         preprocess_func=image_process_func, single_channel=n_channels==1)
     print("Train shape:", images.shape)
     print("Test shape:", X_test.shape)
     sys.stdout.flush()
