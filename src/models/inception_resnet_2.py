@@ -19,7 +19,6 @@ from __future__ import absolute_import
 import warnings
 
 from keras.applications import imagenet_utils
-from keras.applications.imagenet_utils import _obtain_input_shape
 from keras.models import Model
 from keras.layers import Activation
 from keras.layers import AveragePooling2D
@@ -238,15 +237,6 @@ def InceptionResNetV2(include_top=True,
     if weights == 'imagenet' and include_top and classes != 1000:
         raise ValueError('If using `weights` as imagenet with `include_top`'
                          ' as true, `classes` should be 1000')
-
-    # Determine proper input shape
-    input_shape = _obtain_input_shape(
-        input_shape,
-        default_size=299,
-        min_size=139,
-        data_format=K.image_data_format(),
-        require_flatten=False,
-        weights=weights)
 
     if input_tensor is None:
         img_input = Input(shape=input_shape)
