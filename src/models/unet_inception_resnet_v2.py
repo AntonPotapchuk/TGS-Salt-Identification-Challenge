@@ -17,7 +17,8 @@ class UnetInceptionResnet2(ModelBase):
 
     def _create_model(self, input_shape, dropout=0, last_activation='sigmoid'):
         base_model = InceptionResNetV2(include_top=False, input_shape=input_shape)
-
+        for layer in base_model.layers:
+            layer.trainable = True
         conv1 = base_model.get_layer('activation_3').output
         conv2 = base_model.get_layer('activation_5').output
         conv3 = base_model.get_layer('block35_10_ac').output
