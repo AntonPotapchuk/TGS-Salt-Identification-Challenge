@@ -61,5 +61,3 @@ class UnetResnet34(ModelBase):
     @staticmethod
     def get_number_of_channels():
         return 1
-
-UnetResnet34(activation='relu').summary()
