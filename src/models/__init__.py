@@ -24,6 +24,10 @@ def get_model_class(name):
     if name == 'unet_inception_resnet_v2':
         from models.unet_inception_resnet_v2 import UnetInceptionResnet2
         return UnetInceptionResnet2
+    if name == 'unet_resnet34':
+        from models.unet_resnet34 import UnetResnet34
+        return UnetResnet34
+    raise ValueError("Not supported model: %s" % name)
 
 
 reset_tensorflow()

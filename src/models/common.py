@@ -1,7 +1,7 @@
 from keras.layers import Conv2D, BatchNormalization, Activation
 
 
-def conv_block_simple(prev_layer, filters, prefix, strides=(1, 1)):
+def conv_block_simple(prev_layer, filters, prefix, strides=(1, 1), activation='relu'):
     conv = Conv2D(filters, (3, 3), padding="same", kernel_initializer="he_normal",
                   strides=strides, name=prefix + "_conv")(prev_layer)
     conv = BatchNormalization(name=prefix + "_bn")(conv)
