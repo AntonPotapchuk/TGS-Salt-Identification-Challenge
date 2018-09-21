@@ -25,7 +25,7 @@ def process_image(img, width, preprocess_func=None):
 
 
 def get_dataset(ids, img_folder, mask_folder, image_size, is_test=False, preprocess_func=None, single_channel=False):
-    X = np.zeros((len(ids), image_size, image_size, 3), dtype=np.float32)
+    X = np.zeros((len(ids), image_size, image_size, 1 if single_channel else 3), dtype=np.float32)
     if not is_test:
         Y = np.zeros((len(ids), image_size, image_size, 1), dtype=np.bool)
     for n, id_ in tqdm(enumerate(ids), total=len(ids)):

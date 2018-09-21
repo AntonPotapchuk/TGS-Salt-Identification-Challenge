@@ -7,7 +7,7 @@ from models.resnet34 import ResNet34
 
 
 def preprocess_image(img):
-    return img / 256.
+    return img / 255.
 
 
 class UnetResnet34(ModelBase):
