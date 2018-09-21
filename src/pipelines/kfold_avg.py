@@ -229,9 +229,12 @@ def pipeline(args):
 
         ############################# Creating model #############################
         print("Stage 1: binary crossentropy loss")
+        old_weights = None
+        if fold > 0:
+            old_weights = model_path_template % fold  # Model from the previous fold
         training_stage(train_gen, val_gen, train_steps, val_steps, model_path,
                        tensorboard_dir, args, "sigmoid", [my_iou_metric], "binary_crossentropy",
-                       X_train, Y_train, X_val, Y_val)
+                       X_train, Y_train, X_val, Y_val, weights_path=old_weights)
         print("Stage 2: lovasz loss")
         model = training_stage(train_gen, val_gen, train_steps, val_steps, model_path,
                        tensorboard_dir, args, "linear", [my_iou_metric_2], lovasz_loss,
