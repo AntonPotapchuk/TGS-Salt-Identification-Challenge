@@ -8,6 +8,7 @@ from data.loading import get_dataset
 from data.datagen import create_datagen
 from data.submission import make_submission
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
+from keras.optimizers import SGD
 from models import get_model, get_model_class, reset_tensorflow
 from models.losses import lovasz_loss
 from models.metrics import my_iou_metric, my_iou_metric_2
@@ -49,6 +50,8 @@ def create_parser():
     parser.add_argument('--reduce-lr-alpha', default=0.2, type=float)
     parser.add_argument('--save-not-best-only', default=False, action='store_true')
     parser.add_argument('--optimizer', default='adam')
+    parser.add_argument('--momentum', default=0.9, type=float)
+    parser.add_argument('--weight-decay', default=0.0001, type=float)
     parser.add_argument('--nfolds', default=5, type=int)
     parser.add_argument('--activation', default='relu')
     parser = add_datagen_args(parser)
@@ -61,7 +64,10 @@ def training_stage(train_gen, val_gen, train_steps, val_steps, model_path, tenso
     sys.stdout.flush()
     reset_tensorflow()
     model = get_model(args.model_name, dropout=args.dropout, last_activation=last_activation, activation=args.activation)
-    model.compile(optimizer=args.optimizer, loss=loss, metrics=metrics)
+    optimizer = args.optimizer
+    if optimizer == 'sgd':        
+        optimizer = SGD(momentum=args.momentum, decay=args.weight_decay)
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     if weights_path is not None:
         print("Loading weights")
         model.load_weights(weights_path)
