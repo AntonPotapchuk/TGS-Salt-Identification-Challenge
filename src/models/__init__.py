@@ -10,8 +10,8 @@ def reset_tensorflow():
     set_session(sess)  # set this TensorFlow session as the default session for Keras
 
 
-def get_model(name, dropout=0.0, last_activation='sigmoid'):
-    return get_model_class(name)(dropout, last_activation)
+def get_model(name, dropout=0.0, last_activation='sigmoid', activation='relu'):
+    return get_model_class(name)(dropout, last_activation, activation)
 
 
 def get_model_class(name):

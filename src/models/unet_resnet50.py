@@ -11,7 +11,7 @@ from models.resnet50_fixed import ResNet50
 
 
 class UnetResnet50(ModelBase):
-    def __init__(self, dropout=0.0, last_activation='sigmoid'):
+    def __init__(self, dropout=0.0, last_activation='sigmoid', activation='relu'):
         super(UnetResnet50, self).__init__(dropout, last_activation)
 
     @staticmethod

@@ -8,7 +8,7 @@ from models.model_base import ModelBase
 
 
 class UnetInceptionResnet2(ModelBase):
-    def __init__(self, dropout=0.0, last_activation='sigmoid'):
+    def __init__(self, dropout=0.0, last_activation='sigmoid', activation='relu'):
         super(UnetInceptionResnet2, self).__init__(dropout, last_activation)
 
     @staticmethod

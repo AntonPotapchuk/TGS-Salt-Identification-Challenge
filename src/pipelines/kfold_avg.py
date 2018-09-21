@@ -50,6 +50,7 @@ def create_parser():
     parser.add_argument('--save-not-best-only', default=False, action='store_true')
     parser.add_argument('--optimizer', default='adam')
     parser.add_argument('--nfolds', default=5, type=int)
+    parser.add_argument('--activation', default='relu')
     parser = add_datagen_args(parser)
     return parser
 
@@ -59,7 +60,7 @@ def training_stage(train_gen, val_gen, train_steps, val_steps, model_path, tenso
     print("Creating model")
     sys.stdout.flush()
     reset_tensorflow()
-    model = get_model(args.model_name, dropout=args.dropout, last_activation=last_activation)
+    model = get_model(args.model_name, dropout=args.dropout, last_activation=last_activation, activation=args.activation)
     model.compile(optimizer=args.optimizer, loss=loss, metrics=metrics)
     if weights_path is not None:
         print("Loading weights")
