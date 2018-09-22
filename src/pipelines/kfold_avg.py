@@ -7,30 +7,12 @@ from argparse import ArgumentParser
 from data.loading import get_dataset
 from data.datagen import create_datagen
 from data.submission import make_submission
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 from keras.optimizers import SGD
-from models import get_model, get_model_class, reset_tensorflow
+from models import get_model, get_model_class, reset_tensorflow, get_callbacks
 from models.losses import lovasz_loss
-from models.metrics import my_iou_metric, my_iou_metric_2
+from models.metrics import my_iou_metric, my_iou_metric_2, iou_metric_batch
 from tqdm import tqdm
 from sklearn.model_selection import KFold
-
-
-def get_callbacks(model_path, args, tensorboard_dir=None):
-    callbacks = []
-    if args.early_stopping is not None and args.early_stopping > 0:
-        callbacks.append(EarlyStopping(patience=args.early_stopping, verbose=1, monitor="loss"))
-    if tensorboard_dir is not None:
-        callbacks.append(TensorBoard(tensorboard_dir, write_graph=False))
-    if model_path is not None:
-        monitor = "loss" if args.save_not_best_only else "val_loss"
-        print("Optimize:", monitor)
-        callbacks.append(ModelCheckpoint(model_path, save_best_only=True, monitor=monitor))
-    if args.reduce_lr_patience is not None and args.reduce_lr_patience > 0:
-        callbacks.append(ReduceLROnPlateau(monitor='loss',
-                                           factor=args.reduce_lr_alpha,
-                                           patience=args.reduce_lr_patience))
-    return callbacks
 
 
 def create_parser():
@@ -65,7 +47,7 @@ def training_stage(train_gen, val_gen, train_steps, val_steps, model_path, tenso
     reset_tensorflow()
     model = get_model(args.model_name, dropout=args.dropout, last_activation=last_activation, activation=args.activation)
     optimizer = args.optimizer
-    if optimizer == 'sgd':        
+    if optimizer == 'sgd':
         optimizer = SGD(momentum=args.momentum, decay=args.weight_decay)
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     if weights_path is not None:
@@ -98,64 +80,6 @@ def predict_result(model, x_test):  # predict both orginal and reflect x
     preds_test2_refect = model.predict(x_test_reflect)
     preds_test += np.array([np.fliplr(x) for x in preds_test2_refect])
     return preds_test / 2.
-
-
-# Score the model and do a threshold optimization by the best IoU.
-# src: https://www.kaggle.com/aglotero/another-iou-metric
-def iou_metric(labels, y_pred, print_table=False):
-    # if all zeros, original code  generate wrong  bins [-0.5 0 0.5],
-    temp1 = np.histogram2d(labels.flatten(), y_pred.flatten(), bins=([0, 0.5, 1], [0, 0.5, 1]))
-    #     temp1 = np.histogram2d(labels.flatten(), y_pred.flatten(), bins=(true_objects, pred_objects))
-    # print(temp1)
-    intersection = temp1[0]
-    # Compute areas (needed for finding the union between all objects)
-    area_true = np.histogram(labels, bins=[0, 0.5, 1])[0]
-    area_pred = np.histogram(y_pred, bins=[0, 0.5, 1])[0]
-    area_true = np.expand_dims(area_true, -1)
-    area_pred = np.expand_dims(area_pred, 0)
-    # Compute union
-    union = area_true + area_pred - intersection
-    # Exclude background from the analysis
-    intersection = intersection[1:, 1:]
-    intersection[intersection == 0] = 1e-9
-    union = union[1:, 1:]
-    union[union == 0] = 1e-9
-    # Compute the intersection over union
-    iou = intersection / union
-    # Precision helper function
-
-    def precision_at(threshold, iou):
-        matches = iou > threshold
-        true_positives = np.sum(matches, axis=1) == 1  # Correct objects
-        false_positives = np.sum(matches, axis=0) == 0  # Missed objects
-        false_negatives = np.sum(matches, axis=1) == 0  # Extra objects
-        tp, fp, fn = np.sum(true_positives), np.sum(false_positives), np.sum(false_negatives)
-        return tp, fp, fn
-    # Loop over IoU thresholds
-    prec = []
-    if print_table:
-        print("Thresh\tTP\tFP\tFN\tPrec.")
-    for t in np.arange(0.5, 1.0, 0.05):
-        tp, fp, fn = precision_at(t, iou)
-        if (tp + fp + fn) > 0:
-            p = tp / (tp + fp + fn)
-        else:
-            p = 0
-        if print_table:
-            print("{:1.3f}\t{}\t{}\t{}\t{:1.3f}".format(t, tp, fp, fn, p))
-        prec.append(p)
-    if print_table:
-        print("AP\t-\t-\t-\t{:1.3f}".format(np.mean(prec)))
-    return np.mean(prec)
-
-
-def iou_metric_batch(y_true_in, y_pred_in):
-    batch_size = y_true_in.shape[0]
-    metric = []
-    for batch in range(batch_size):
-        value = iou_metric(y_true_in[batch], y_pred_in[batch])
-        metric.append(value)
-    return np.mean(metric)
 
 
 def pipeline(args):
@@ -229,8 +153,8 @@ def pipeline(args):
                                  batch_size=batch_size,
                                  shuffle=shuffle,
                                  random_seed=random_seed)
-        train_steps = int(len(X_train) / batch_size)
-        val_steps = int(len(X_val) / batch_size)
+        train_steps = int(np.ceil(len(X_train) / batch_size))
+        val_steps = int(np.ceil(len(X_val) / batch_size))
         gc.collect()
 
         ############################# Creating model #############################

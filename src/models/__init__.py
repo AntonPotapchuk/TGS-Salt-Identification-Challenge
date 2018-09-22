@@ -1,5 +1,6 @@
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
+from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 
 
 def reset_tensorflow():
@@ -8,6 +9,24 @@ def reset_tensorflow():
     config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
     sess = tf.Session(config=config)
     set_session(sess)  # set this TensorFlow session as the default session for Keras
+
+
+def get_callbacks(model_path, args, tensorboard_dir=None):
+    callbacks = []
+    if args.early_stopping is not None and args.early_stopping > 0:
+        callbacks.append(EarlyStopping(patience=args.early_stopping, verbose=1, monitor="loss"))
+    if tensorboard_dir is not None:
+        callbacks.append(TensorBoard(tensorboard_dir, write_graph=False))
+    if model_path is not None:
+        monitor = "loss" if args.save_not_best_only else "val_loss"
+        print("Optimize:", monitor)
+        callbacks.append(ModelCheckpoint(model_path, save_best_only=True, monitor=monitor))
+    if args.reduce_lr_patience is not None and args.reduce_lr_patience > 0:
+        callbacks.append(ReduceLROnPlateau(monitor='loss',
+                                           factor=args.reduce_lr_alpha,
+                                           patience=args.reduce_lr_patience))
+    return callbacks
+
 
 
 def get_model(name, dropout=0.0, last_activation='sigmoid', activation='relu'):
