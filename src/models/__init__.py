@@ -46,6 +46,9 @@ def get_model_class(name):
     if name == 'unet_resnet34':
         from models.unet_resnet34 import UnetResnet34
         return UnetResnet34
+    if name == 'unet_resnext':
+        from models.unet_resnext import UnetResnext
+        return UnetResnext
     raise ValueError("Not supported model: %s" % name)
 
 
