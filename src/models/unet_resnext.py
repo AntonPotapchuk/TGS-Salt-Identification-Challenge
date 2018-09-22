@@ -55,5 +55,3 @@ class UnetResnext(ModelBase):
     @staticmethod
     def get_number_of_channels():
         return 1
-
-UnetResnext().summary()
