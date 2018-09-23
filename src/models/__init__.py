@@ -28,9 +28,8 @@ def get_callbacks(model_path, args, tensorboard_dir=None):
     return callbacks
 
 
-
-def get_model(name, dropout=0.0, last_activation='sigmoid', activation='relu'):
-    return get_model_class(name)(dropout, last_activation, activation)
+def get_model(name, dropout=0.0, last_activation='sigmoid', activation='relu', channels=None):
+    return get_model_class(name)(dropout, last_activation, activation, channels)
 
 
 def get_model_class(name):
@@ -49,6 +48,9 @@ def get_model_class(name):
     if name == 'unet_resnext':
         from models.unet_resnext import UnetResnext
         return UnetResnext
+    if name == 'unet_resnet34se':
+        from models.unet_resnet34se import UnetResnet34SE
+        return UnetResnet34SE
     raise ValueError("Not supported model: %s" % name)
 
 

@@ -2,10 +2,12 @@ from abc import ABC, abstractmethod
 
 
 class ModelBase(ABC):
-    def __init__(self, dropout, last_activation='sigmoid'):
+    def __init__(self, dropout, last_activation='sigmoid', channels=None):
         self.custom_objects = {}
         width = self.get_image_size()
-        self.model = self._create_model(input_shape=[width, width, self.get_number_of_channels()], dropout=dropout,
+        if channels is None:
+            channels = self.get_number_of_channels()
+        self.model = self._create_model(input_shape=[width, width, channels], dropout=dropout,
                                         last_activation=last_activation)
 
     @staticmethod

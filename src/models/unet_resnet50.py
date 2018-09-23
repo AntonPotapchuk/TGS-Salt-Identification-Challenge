@@ -11,8 +11,8 @@ from models.resnet50_fixed import ResNet50
 
 
 class UnetResnet50(ModelBase):
-    def __init__(self, dropout=0.0, last_activation='sigmoid', activation='relu'):
-        super(UnetResnet50, self).__init__(dropout, last_activation)
+    def __init__(self, dropout=0.0, last_activation='sigmoid', activation='relu', channels=None):
+        super(UnetResnet50, self).__init__(dropout, last_activation, channels)
 
     @staticmethod
     def get_image_size():

@@ -7,8 +7,8 @@ from models.se_resnext import SEResNextImageNet
 
 
 class UnetResnext(ModelBase):
-    def __init__(self, dropout=0.0, last_activation='sigmoid', activation='relu'):
-        super(UnetResnext, self).__init__(dropout, last_activation)
+    def __init__(self, dropout=0.0, last_activation='sigmoid', activation='relu', channels=None):
+        super(UnetResnext, self).__init__(dropout, last_activation, channels)
 
     @staticmethod
     def get_image_size():

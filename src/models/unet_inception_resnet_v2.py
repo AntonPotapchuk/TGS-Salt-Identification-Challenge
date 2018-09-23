@@ -8,8 +8,8 @@ from models.model_base import ModelBase
 
 
 class UnetInceptionResnet2(ModelBase):
-    def __init__(self, dropout=0.0, last_activation='sigmoid', activation='relu'):
-        super(UnetInceptionResnet2, self).__init__(dropout, last_activation)
+    def __init__(self, dropout=0.0, last_activation='sigmoid', activation='relu', channels=None):
+        super(UnetInceptionResnet2, self).__init__(dropout, last_activation, channels)
 
     @staticmethod
     def get_image_size():

@@ -45,7 +45,11 @@ def training_stage(train_gen, val_gen, train_steps, val_steps, model_path, tenso
     print("Creating model")
     sys.stdout.flush()
     reset_tensorflow()
-    model = get_model(args.model_name, dropout=args.dropout, last_activation=last_activation, activation=args.activation)
+    model = get_model(args.model_name,
+                      dropout=args.dropout,
+                      last_activation=last_activation,
+                      activation=args.activation,
+                      channels=3 if args.use_depth else None)
     optimizer = args.optimizer
     if optimizer == 'sgd':
         optimizer = SGD(momentum=args.momentum, decay=args.weight_decay)
@@ -115,18 +119,22 @@ def pipeline(args):
     image_process_func = model_class.get_image_preprocessor()
     image_size = model_class.get_image_size()
     n_channels = model_class.get_number_of_channels()
+    if args.use_depth:
+        n_channels = 3
 
     ############################# CREATE TRAIING SET #############################
     images_ids = os.listdir(train_img_path)
     print("Preparing training set")
     sys.stdout.flush()
     images, masks = get_dataset(images_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
-                                preprocess_func=image_process_func, single_channel=n_channels==1)
+                                preprocess_func=image_process_func, single_channel=n_channels==1,
+                                use_depth=args.use_depth)
     print("Preparing test set")
     sys.stdout.flush()
     test_ids = os.listdir(test_img_path)
     X_test = get_dataset(test_ids, test_img_path, None, image_size=image_size, is_test=True,
-                         preprocess_func=image_process_func, single_channel=n_channels==1)
+                         preprocess_func=image_process_func, single_channel=n_channels==1,
+                         use_depth=args.use_depth)
     print("Train shape:", images.shape)
     print("Test shape:", X_test.shape)
     sys.stdout.flush()

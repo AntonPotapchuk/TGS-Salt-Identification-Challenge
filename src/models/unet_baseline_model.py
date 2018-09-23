@@ -5,8 +5,8 @@ from common.constants import ORIGINAL_IMAGE_SIZE
 
 
 class UnetBaseline(ModelBase):
-    def __init__(self, dropout=0, last_activation='sigmoid', activation='relu'):
-        super(UnetBaseline, self).__init__(dropout, last_activation)
+    def __init__(self, dropout=0, last_activation='sigmoid', activation='relu', channels=None):
+        super(UnetBaseline, self).__init__(dropout, last_activation, channels)
 
     @staticmethod
     def get_image_size():

@@ -12,6 +12,7 @@ def add_argparser_arguments(parser):
     parser.add_argument('--zoom-range', default=0, type=float)
     parser.add_argument('--horizontal-flip', default=False, action='store_true')
     parser.add_argument('--validation-split', default=0.1, type=float)
+    parser.add_argument('--use-depth', default=False, action='store_true')
     return parser
 
 
