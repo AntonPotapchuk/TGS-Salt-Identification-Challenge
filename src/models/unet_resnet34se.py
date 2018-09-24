@@ -1,4 +1,4 @@
-from keras.layers import Conv2D, UpSampling2D, SpatialDropout2D, np
+from keras.layers import Conv2D, UpSampling2D, SpatialDropout2D
 from keras.layers.merge import concatenate
 from keras.models import Model
 from models.common import conv_block_simple
@@ -8,7 +8,9 @@ from models.se_resnet import SEResNet34
 
 
 def preprocess_image(img):
-    return img / 255.
+    img[0, :, :] = img[0, :, :] / 255.
+    img[2, :, :] = img[2, :, :] / 255.
+    return img
 
 
 class UnetResnet34SE(ModelBase):
@@ -24,10 +26,10 @@ class UnetResnet34SE(ModelBase):
         resnet_base = SEResNet34(input_shape=input_shape, include_top=False, activation=self.activation)
 
         conv1 = resnet_base.get_layer("activation_1").output           # 112x112x64
-        conv2 = resnet_base.get_layer("activation_11").output           # 56x56x64
-        conv3 = resnet_base.get_layer("activation_23").output          # 28x28x128
-        conv4 = resnet_base.get_layer("activation_41").output          # 14x14x256
-        conv5 = resnet_base.get_layer("activation_50").output          # 7x7x512
+        conv2 = resnet_base.get_layer("activation_9").output           # 56x56x64
+        conv3 = resnet_base.get_layer("activation_18").output          # 28x28x128
+        conv4 = resnet_base.get_layer("activation_31").output          # 14x14x256
+        conv5 = resnet_base.get_layer("activation_38").output          # 7x7x512
 
         up6 = concatenate([UpSampling2D()(conv5), conv4], axis=-1)
         conv6 = conv_block_simple(up6, 256, "conv6_1", activation=self.activation)
@@ -67,3 +69,5 @@ class UnetResnet34SE(ModelBase):
     @staticmethod
     def get_number_of_channels():
         return 1
+
+UnetResnet34SE(0.2).summary()

@@ -86,9 +86,6 @@ def _resnet_block(input, filters, strides=(1, 1), activation='relu'):
 
     x = Conv2D(filters, (3, 3), padding='same')(x)
 
-    # squeeze and excite block
-    x = scse_block(x, activation=activation)
-
     m = add([x, init])
     return m
 
@@ -128,13 +125,16 @@ def _create_se_resnet(classes, img_input, include_top, filters,
     # block 2 (projection block)
     for i in range(N[0]):
         x = _resnet_block(x, filters[0], activation=activation)
+        # squeeze and excite block
+    x = scse_block(x, activation=activation)
 
     # block 3 - N
     for k in range(1, len(N)):
         x = _resnet_block(x, filters[k], strides=(2, 2), activation=activation)
-
         for i in range(N[k] - 1):
             x = _resnet_block(x, filters[k], activation=activation)
+            # squeeze and excite block
+        x = scse_block(x, activation=activation)
 
     x = BatchNormalization()(x)
     x = Activation(activation=activation)(x)

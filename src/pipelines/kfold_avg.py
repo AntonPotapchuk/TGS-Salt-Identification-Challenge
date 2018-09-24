@@ -34,6 +34,7 @@ def create_parser():
     parser.add_argument('--optimizer', default='adam')
     parser.add_argument('--momentum', default=0.9, type=float)
     parser.add_argument('--weight-decay', default=0.0001, type=float)
+    parser.add_argument('--weights-path', default=None, type=str)
     parser.add_argument('--nfolds', default=5, type=int)
     parser.add_argument('--activation', default='relu')
     parser = add_datagen_args(parser)
@@ -41,7 +42,7 @@ def create_parser():
 
 
 def training_stage(train_gen, val_gen, train_steps, val_steps, model_path, tensorboard_dir, args, last_activation,
-                metrics, loss, X_train, Y_train, X_val, Y_val, weights_path=None):
+                   metrics, loss, X_train, Y_train, X_val, Y_val, weights_path=None):
     print("Creating model")
     sys.stdout.flush()
     reset_tensorflow()
@@ -127,13 +128,13 @@ def pipeline(args):
     print("Preparing training set")
     sys.stdout.flush()
     images, masks = get_dataset(images_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
-                                preprocess_func=image_process_func, single_channel=n_channels==1,
+                                preprocess_func=image_process_func, single_channel=n_channels == 1,
                                 use_depth=args.use_depth)
     print("Preparing test set")
     sys.stdout.flush()
     test_ids = os.listdir(test_img_path)
     X_test = get_dataset(test_ids, test_img_path, None, image_size=image_size, is_test=True,
-                         preprocess_func=image_process_func, single_channel=n_channels==1,
+                         preprocess_func=image_process_func, single_channel=n_channels == 1,
                          use_depth=args.use_depth)
     print("Train shape:", images.shape)
     print("Test shape:", X_test.shape)
@@ -146,7 +147,9 @@ def pipeline(args):
         print("\n\nFold: ", fold + 1)
         tensorboard_dir = tensorboard_dir_base + "_fold" + str(fold + 1)
         model_path = model_path_template % (fold + 1)
-        submission_path = submission_path_template % ("_fold" + str(fold + 1))
+        submission_path_round = submission_path_template % ("_fold" + str(fold + 1) + "_round")
+        submission_path_thr = submission_path_template % ("_fold" + str(fold + 1) + "_thr")
+        submission_path_all_round = submission_path_template % ("_fold" + str(fold + 1) + "_all_round")
         if not os.path.isdir(tensorboard_dir):
             os.makedirs(tensorboard_dir)
         gc.collect()
@@ -165,18 +168,24 @@ def pipeline(args):
         val_steps = int(np.ceil(len(X_val) / batch_size))
         gc.collect()
 
-        ############################# Creating model #############################
-        print("Stage 1: binary crossentropy loss")
-        old_weights = None
+        # Check pretrained model
+        pretrained_weights = None
         if fold > 0:
-            old_weights = model_path_template % fold  # Model from the previous fold
-        training_stage(train_gen, val_gen, train_steps, val_steps, model_path,
-                       tensorboard_dir, args, "sigmoid", [my_iou_metric], "binary_crossentropy",
-                       X_train, Y_train, X_val, Y_val, weights_path=old_weights)
+            pretrained_weights = model_path_template % fold  # Model from the previous fold
+        elif args.weights_path is not None:
+            pretrained_weights = args.weights_path
+        ############################# Training model #############################
+        # There is no pretrained model. Need to train with binary crossentropy first
+        if pretrained_weights is None:
+            print("Stage 1: binary crossentropy loss")
+            training_stage(train_gen, val_gen, train_steps, val_steps, model_path,
+                           tensorboard_dir, args, "sigmoid", [my_iou_metric], "binary_crossentropy",
+                           X_train, Y_train, X_val, Y_val, weights_path=None)
+            pretrained_weights = model_path
         print("Stage 2: lovasz loss")
         model = training_stage(train_gen, val_gen, train_steps, val_steps, model_path,
-                       tensorboard_dir, args, "linear", [my_iou_metric_2], lovasz_loss,
-                       X_train, Y_train, X_val, Y_val, model_path)
+                               tensorboard_dir, args, "linear", [my_iou_metric_2], lovasz_loss,
+                               X_train, Y_train, X_val, Y_val, pretrained_weights)
         model.load_weights(model_path)
 
         print("Validation prediction. Estimating optimal threshold.")
@@ -196,7 +205,11 @@ def pipeline(args):
         preds_test = predict_result(model, X_test)
         predictions[fold] = preds_test
         print("Making submission")
-        make_submission(test_ids, preds_test, submission_path, mode="threshold", threshold=threshold_best)
+        make_submission(test_ids, preds_test, submission_path_round, mode="threshold", threshold=threshold_best)
+        make_submission(test_ids, preds_test, submission_path_thr, mode="threshold", threshold=0.0)
+        temp_pred = np.mean(predictions, axis=0)
+        make_submission(test_ids, temp_pred, submission_path_all_round, mode="threshold", threshold=0.0)
+
 
     predictions = np.mean(predictions, axis=0)
     np.save(os.path.join(submission_dir, args.model_name + "_prediction.npy"), predictions)
