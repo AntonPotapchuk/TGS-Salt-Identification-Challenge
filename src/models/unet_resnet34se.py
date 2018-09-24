@@ -70,4 +70,3 @@ class UnetResnet34SE(ModelBase):
     def get_number_of_channels():
         return 1
 
-UnetResnet34SE(0.2).summary()
