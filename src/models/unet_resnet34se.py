@@ -25,11 +25,11 @@ class UnetResnet34SE(ModelBase):
     def _create_model(self, input_shape, dropout=0, last_activation='sigmoid'):
         resnet_base = SEResNet34(input_shape=input_shape, include_top=False, activation=self.activation)
 
-        conv1 = resnet_base.get_layer("activation_1").output           # 112x112x64
-        conv2 = resnet_base.get_layer("activation_9").output           # 56x56x64
-        conv3 = resnet_base.get_layer("activation_18").output          # 28x28x128
-        conv4 = resnet_base.get_layer("activation_31").output          # 14x14x256
-        conv5 = resnet_base.get_layer("activation_38").output          # 7x7x512
+        conv1 = resnet_base.get_layer("activation_1").output  # 112x112x64
+        conv2 = resnet_base.get_layer("activation_11").output  # 56x56x64
+        conv3 = resnet_base.get_layer("activation_23").output  # 28x28x128
+        conv4 = resnet_base.get_layer("activation_41").output  # 14x14x256
+        conv5 = resnet_base.get_layer("activation_50").output  # 7x7x512
 
         up6 = concatenate([UpSampling2D()(conv5), conv4], axis=-1)
         conv6 = conv_block_simple(up6, 256, "conv6_1", activation=self.activation)
