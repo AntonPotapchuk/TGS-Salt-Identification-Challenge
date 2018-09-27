@@ -1,3 +1,4 @@
+import cv2
 import os
 import numpy as np
 import gc
@@ -65,3 +66,40 @@ def get_dataset(ids, img_folder, mask_folder, image_size, is_test=False,
     if is_test:
         return X
     return X, Y
+
+
+#### Reference  from Heng's discussion
+# https://www.kaggle.com/c/tgs-salt-identification-challenge/discussion/63984#382657
+def _get_mask_type(mask):
+    border = 10
+    outer = np.zeros((101-2*border, 101-2*border), np.float32)
+    outer = cv2.copyMakeBorder(outer, border, border, border, border, borderType = cv2.BORDER_CONSTANT, value = 1)
+
+    cover = (mask>0.5).sum()
+    if cover < 8:
+        return 0 # empty
+    if cover == ((mask*outer) > 0.5).sum():
+        return 1 #border
+    if np.all(mask==mask[0]):
+        return 2 #vertical
+
+    percentage = cover/(101*101)
+    if percentage < 0.15:
+        return 3
+    elif percentage < 0.25:
+        return 4
+    elif percentage < 0.50:
+        return 5
+    elif percentage < 0.75:
+        return 6
+    else:
+        return 7
+
+
+def get_mask_types(ids, mask_folder):
+    result = np.zeros(len(ids), dtype=np.int8)
+    for n, id_ in tqdm(enumerate(ids), total=len(ids)):
+        mask = load_img(os.path.join(mask_folder, id_))
+        mask = img_to_array(mask)[:, :, 1]
+        result[n] = _get_mask_type(mask)
+    return result

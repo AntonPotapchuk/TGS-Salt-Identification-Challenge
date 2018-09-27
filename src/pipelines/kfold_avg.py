@@ -4,7 +4,7 @@ import os
 import sys
 
 from argparse import ArgumentParser
-from data.loading import get_dataset
+from data.loading import get_dataset, get_mask_types
 from data.datagen import create_datagen
 from data.submission import make_submission
 from keras.optimizers import SGD
@@ -12,7 +12,7 @@ from models import get_model, get_model_class, reset_tensorflow, get_callbacks
 from models.losses import lovasz_loss
 from models.metrics import my_iou_metric, my_iou_metric_2, iou_metric_batch
 from tqdm import tqdm
-from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 
 
 def create_parser():
@@ -124,15 +124,16 @@ def pipeline(args):
         n_channels = 3
 
     ############################# CREATE TRAIING SET #############################
-    images_ids = os.listdir(train_img_path)
+    images_ids = os.listdir(train_img_path)[:200]
     print("Preparing training set")
     sys.stdout.flush()
     images, masks = get_dataset(images_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
                                 preprocess_func=image_process_func, single_channel=n_channels == 1,
                                 use_depth=args.use_depth)
+    mask_types = get_mask_types(images_ids, train_mask_path)
     print("Preparing test set")
     sys.stdout.flush()
-    test_ids = os.listdir(test_img_path)
+    test_ids = os.listdir(test_img_path)[:200]
     X_test = get_dataset(test_ids, test_img_path, None, image_size=image_size, is_test=True,
                          preprocess_func=image_process_func, single_channel=n_channels == 1,
                          use_depth=args.use_depth)
@@ -141,9 +142,9 @@ def pipeline(args):
     sys.stdout.flush()
 
     ############################# K-FOLD TRAINING #############################
-    kf = KFold(n_splits=args.nfolds, random_state=args.random_seed, shuffle=True)
+    kf = StratifiedKFold(n_splits=args.nfolds, random_state=args.random_seed, shuffle=True)
     predictions = np.zeros(shape=(args.nfolds, len(test_ids), image_size, image_size, 1), dtype=np.float32)
-    for fold, (train_index, test_index) in enumerate(kf.split(images, masks)):
+    for fold, (train_index, test_index) in enumerate(kf.split(images, mask_types)):
         print("\n\nFold: ", fold + 1)
         tensorboard_dir = tensorboard_dir_base + "_fold" + str(fold + 1)
         model_path = model_path_template % (fold + 1)
