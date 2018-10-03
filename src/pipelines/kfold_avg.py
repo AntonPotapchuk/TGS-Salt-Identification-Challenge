@@ -121,7 +121,7 @@ def pipeline(args):
     image_size = model_class.get_image_size()
     single_channel = model_class.get_number_of_channels() == 1
     if args.use_depth:
-        n_channels = 3
+        single_channel = False
 
     ############################# CREATE TRAIING SET #############################
     images_ids = os.listdir(train_img_path)
