@@ -119,7 +119,7 @@ def pipeline(args):
     model_class = get_model_class(args.model_name)
     image_process_func = model_class.get_image_preprocessor()
     image_size = model_class.get_image_size()
-    n_channels = model_class.get_number_of_channels()
+    single_channel = model_class.get_number_of_channels() == 1
     if args.use_depth:
         n_channels = 3
 
@@ -128,14 +128,14 @@ def pipeline(args):
     print("Preparing training set")
     sys.stdout.flush()
     images, masks = get_dataset(images_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
-                                preprocess_func=image_process_func, single_channel=n_channels == 1,
+                                preprocess_func=image_process_func, single_channel=single_channel,
                                 use_depth=args.use_depth)
     mask_types = get_mask_types(images_ids, train_mask_path)
     print("Preparing test set")
     sys.stdout.flush()
     test_ids = os.listdir(test_img_path)
     X_test = get_dataset(test_ids, test_img_path, None, image_size=image_size, is_test=True,
-                         preprocess_func=image_process_func, single_channel=n_channels == 1,
+                         preprocess_func=image_process_func, single_channel=single_channel,
                          use_depth=args.use_depth)
     print("Train shape:", images.shape)
     print("Test shape:", X_test.shape)
@@ -177,12 +177,11 @@ def pipeline(args):
             pretrained_weights = args.weights_path
         ############################# Training model #############################
         # There is no pretrained model. Need to train with binary crossentropy first
-        if pretrained_weights is None:
-            print("Stage 1: binary crossentropy loss")
-            training_stage(train_gen, val_gen, train_steps, val_steps, model_path,
-                           tensorboard_dir, args, "sigmoid", [my_iou_metric], "binary_crossentropy",
-                           X_train, Y_train, X_val, Y_val, weights_path=None)
-            pretrained_weights = model_path
+        print("Stage 1: binary crossentropy loss")
+        training_stage(train_gen, val_gen, train_steps, val_steps, model_path,
+                       tensorboard_dir, args, "sigmoid", [my_iou_metric], "binary_crossentropy",
+                       X_train, Y_train, X_val, Y_val, weights_path=pretrained_weights)
+        pretrained_weights = model_path
         print("Stage 2: lovasz loss")
         model = training_stage(train_gen, val_gen, train_steps, val_steps, model_path,
                                tensorboard_dir, args, "linear", [my_iou_metric_2], lovasz_loss,
