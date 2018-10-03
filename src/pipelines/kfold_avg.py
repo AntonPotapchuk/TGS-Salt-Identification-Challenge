@@ -124,7 +124,7 @@ def pipeline(args):
         n_channels = 3
 
     ############################# CREATE TRAIING SET #############################
-    images_ids = os.listdir(train_img_path)[:200]
+    images_ids = os.listdir(train_img_path)
     print("Preparing training set")
     sys.stdout.flush()
     images, masks = get_dataset(images_ids, train_img_path, train_mask_path, image_size=image_size, is_test=False,
@@ -133,7 +133,7 @@ def pipeline(args):
     mask_types = get_mask_types(images_ids, train_mask_path)
     print("Preparing test set")
     sys.stdout.flush()
-    test_ids = os.listdir(test_img_path)[:200]
+    test_ids = os.listdir(test_img_path)
     X_test = get_dataset(test_ids, test_img_path, None, image_size=image_size, is_test=True,
                          preprocess_func=image_process_func, single_channel=n_channels == 1,
                          use_depth=args.use_depth)
