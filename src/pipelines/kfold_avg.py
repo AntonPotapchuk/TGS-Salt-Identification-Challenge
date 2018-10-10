@@ -212,7 +212,7 @@ def pipeline(args):
 
 
     predictions = np.mean(predictions, axis=0)
-    np.save(os.path.join(submission_dir, args.model_name + "_prediction.npy"), predictions)
+    # np.save(os.path.join(submission_dir, args.model_name + "_prediction.npy"), predictions)
     print("\n\nMaking final submission")
     # TODO ???? > 0 ????
     make_submission(test_ids, predictions, submission_path_template % "_final", mode="threshold", threshold=0.0)
